@@ -1,0 +1,39 @@
+<html>
+<head>
+  <title>Check</title>
+</head>
+<body>
+
+
+  <form>
+  <p>author: <input type'text' placeholder="authorname"></p>
+  <p>data: <input type'text' placeholder="datatodisplay"></p>
+  <p>type: <input type'text' placeholder="type"></p>
+  <p><input type='Submit' value='Submit'></p></form>
+
+
+<script src="https://www.gstatic.com/firebasejs/4.4.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyD4Y_RtHIhkzrEBWJG8ADDb_4iidAFrZU4",
+    authDomain: "ard-bits.firebaseapp.com",
+    databaseURL: "https://ard-bits.firebaseio.com",
+    projectId: "ard-bits",
+    storageBucket: "ard-bits.appspot.com",
+    messagingSenderId: "895100654158"
+  };
+  firebase.initializeApp(config);
+
+    var dbref = firebase.database().ref().child('debug').child('home');
+    dbref.on('value', function(snapshot){
+      snapshot.forEach(function(item){
+        var dict = item.val();
+        var date = dict['date'];
+        console.log(date['date']);
+      })
+      console.log('val: ' + snapshot.val());
+    });
+  </script>
+</body>
+</html>
