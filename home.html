@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Check</title>
+  <title>HOME</title>
 </head>
 <body>
 
@@ -10,8 +10,10 @@
     <p>data: <input type'text' placeholder="datatodisplay"></p>
     <p>type: <input type'text' placeholder="type"></p>
   </form>
+  <br>
   <button id="submit">Submit</button>
-  
+  <p id='details'></p>
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase.js"></script>
   <script>
@@ -27,6 +29,9 @@
   firebase.initializeApp(config);
 
   var dbref = firebase.database().ref().child('debug').child('home');
+  var datatodisplay="<ol>";
+  var idnum=0;
+  var delstr = 'deleteclass';
   dbref.on('value', function(snapshot){
     snapshot.forEach(function(item){
         var dict = item.val();
@@ -34,10 +39,24 @@
         var author = dict['author'];
         var data = dict['data'];
         var type = dict['type'];
-    //    console.log(date['date']);
-    })
+        datatodisplay += "<li><ul>"
+        datatodisplay += "<li>"+"author : "+ author +"</li>";
+        datatodisplay += "<li>"+"data : "+ data +"</li>";
+        datatodisplay += "<li>"+"date : "+ date['date'] + "/" + date['month'] + "/" + date['year'] + "</li>";
+        datatodisplay += "<li>"+ "<button class="+delstr+" id="+item.key+">DELETE</button>" +"</li>";
+        idnum++;
+        datatodisplay += "</ul></li>";
+    });
+    datatodisplay += "</ol>";
+    document.getElementById("details").innerHTML = datatodisplay;
+    $(".deleteclass").click(function(){
+      console.log(this.id+'');
+      datatodisplay = '<ol>';
+      dbref.child(this.id).remove();
+    });
   //console.log('val: ' + snapshot.val());
   });
+
   var author_i;
   var data_i;
   var date_i={};
@@ -58,6 +77,7 @@
     date_i['timezoneOffset'] = dateObj.getTimezoneOffset();
     date_i['year'] = dateObj.getUTCFullYear();
     console.log(date_i);
+    datatodisplay="<ol>";
     dbref.push({
       author: author_i,
       data: data_i,
