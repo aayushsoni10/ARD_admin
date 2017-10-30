@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HOME</title>
+</head>
+<body>
+
+  <form id='homeform'>
+    <p>author: <input type='text' placeholder="authorname" value="Admin"></p>
+    <p id = "subsection"><ul><ul><li>Type <select class="typemain" id="type1"><option disabled selected value> -- select an option -- </option><option value=1>Announcement</option><option value=2>Text</option><option value=3>Photo</option></select><br><span id="data_type1"></span></li></ul><span id="listitems"></span></ul></p>
+    <p><button type="button" id="addsection">AddMoreSection</button>
+    <p>data: <input type='text' placeholder="datatodisplay"></p>
+    <p>type: <input type='text' placeholder="type"></p>
+  </form>
+  <br>
+  <button id="submit">Submit</button>
+  <button id="submit1">SubmitMore</button>
+  <p id='details'></p>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase.js"></script>
+  <script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyD4Y_RtHIhkzrEBWJG8ADDb_4iidAFrZU4",
+    authDomain: "ard-bits.firebaseapp.com",
+    databaseURL: "https://ard-bits.firebaseio.com",
+    projectId: "ard-bits",
+    storageBucket: "ard-bits.appspot.com",
+    messagingSenderId: "895100654158"
+  };
+  firebase.initializeApp(config);
+
+  var dbref = firebase.database().ref().child('debug').child('home');
+  var datatodisplay="<ol>";
+  var idnum=0;
+  var delstr = 'deleteclass';
+  dbref.on('value', function(snapshot){
+    snapshot.forEach(function(item){
+        var dict = item.val();
+        var date = dict['date'];
+        var author = dict['author'];
+        var data = dict['data'];
+        var type = dict['type'];
+        datatodisplay += "<li><ul>"
+        datatodisplay += "<li>"+"author : "+ author +"</li>";
+        datatodisplay += "<li>"+"data : "+ data +"</li>";
+        datatodisplay += "<li>"+"date : "+ date['date'] + "/" + date['month'] + "/" + date['year'] + "</li>";
+        datatodisplay += "<li>"+ "<button class="+delstr+" id="+item.key+">DELETE</button>" +"</li>";
+        idnum++;
+        datatodisplay += "</ul></li>";
+    });
+    datatodisplay += "</ol>";
+    document.getElementById("details").innerHTML = datatodisplay;
+    $(".deleteclass").click(function(){
+      console.log(this.id+'');
+      datatodisplay = '<ol>';
+      dbref.child(this.id).remove();
+    });
+
+  //console.log('val: ' + snapshot.val());
+  });
+
+  var no_text;
+  var no_photo;
+  var e = document.getElementById("type1");
+  var strUser = e.options[e.selectedIndex].value;
+  console.log(strUser);
+  if(strUser==1){
+    $('#addsection').hide();
+    console.log('tmkc');
+  }else
+  if(strUser==2){
+    $('#addsection').show();
+    no_text+=1;
+    if(no_photo!=0){
+      no_photo-=1;
+    }
+  }else
+  if(strUser==3){
+    $('#addsection').show();
+    no_photo+=1;
+    if(no_text!=0){
+      no_text-=1;
+    }
+  }
+
+  var no_sub = 1;
+  var nameoflist = "type";
+  var spanid = "span";
+  $("#type1").click(function(){
+    var e1 = document.getElementById("type1");
+    var strUser1 = e.options[e.selectedIndex].value;
+    console.log(strUser1);
+    if(strUser1 == 1){
+      $('#addsection').hide();
+      $('#listitems').empty();
+    }
+    else{
+      console.log(strUser1);
+      $('#addsection').show();
+      $('#listitems').show();
+    }
+  });
+
+  $('#addsection').click(function(){
+    no_sub+=1;
+    var dataofsub = "<ul><li> Type <select class="+nameoflist+" id="+nameoflist+no_sub+"><option value="+1+">Text</option><option value="+2+">Photo</option></select></li><span id="+spanid+no_sub+"></span></ul>";
+    document.getElementById("listitems").innerHTML += dataofsub;
+    $(".type").click(function(){
+      console.log("hello");
+      var selected_type = (''+this.id).substring(4,5);
+      console.log(selected_type);
+      console.log(''+this.id);
+      var e1 = document.getElementById(''+this.id);
+      var strUser1 = e1.options[e1.selectedIndex].value;
+      if(strUser1==1){
+        document.getElementById(spanid+selected_type).innerHTML = "<p>Text<p>";
+      }
+      else{
+        document.getElementById(spanid+selected_type).innerHTML = "<p>Photo<p>";
+      }
+    });
+  });
+
+  var author_i;
+  var data_i;
+  var date_i={};
+  var type_i;
+  $('#submit').click(function(){
+    console.log('lol');
+    author_i = document.getElementById('homeform').elements[0].value;
+    data_i = document.getElementById('homeform').elements[3].value;
+    type_i = document.getElementById('homeform').elements[4].value;
+    var dateObj = new Date();
+    date_i['date'] = dateObj.getUTCDate();
+    date_i['day'] = dateObj.getDay();
+    date_i['hours'] = dateObj.getHours();
+    date_i['minutes'] = dateObj.getMinutes();
+    date_i['month'] = dateObj.getUTCMonth() + 1; //months from 1-12
+    date_i['seconds'] = dateObj.getSeconds();
+    date_i['time'] = dateObj.getTime();
+    date_i['timezoneOffset'] = dateObj.getTimezoneOffset();
+    date_i['year'] = dateObj.getUTCFullYear();
+    console.log(document.getElementById('homeform').elements[0].value);
+    datatodisplay="<ol>";
+    document.getElementById('homeform').elements[0].value = 'Admin';
+    document.getElementById('homeform').elements[1].value = '';
+    document.getElementById('homeform').elements[2].value = '';
+    dbref.push({
+      author: author_i,
+      data: data_i,
+      date: date_i,
+      type: parseInt(type_i)
+    });
+  });
+  </script>
+</body>
+</html>
